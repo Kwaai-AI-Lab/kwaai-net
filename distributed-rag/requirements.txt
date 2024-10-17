@@ -1,0 +1,12 @@
+chromadb
+sentence_transformers
+langchain
+langchain-community
+langchain-huggingface
+wikipedia
+spacy
+nltk
+
+numpy==1.26.4
+onnxruntime==1.19.2
+httpcore==1.0.6
