@@ -24,7 +24,7 @@ def get_embedding_model():
         )
   return hf
 
-def get_embeddings():
+def wikipedia_embeddings():
   loader = WikipediaLoader(query='Artificial Intelligence', load_max_docs=10)
   documents = loader.load()
   text_splitter = SpacyTextSplitter(chunk_size=1000, chunk_overlap=100)
@@ -39,6 +39,27 @@ def get_embeddings():
       save_chunk(chunk, id)
       yield (embedding, id)
 
+def load_data(collections, get_embeddings, batch_size=1):
+  shard_count = len(collections)
+  group_size = batch_size * shard_count
+
+  index = 0
+  embeddings = [[] for i in range(shard_count)]
+  ids = [[] for i in range(shard_count)]
+
+  for embedding, id in get_embeddings():
+    if index % group_size == 0 and index > 0:
+      for i in range(shard_count):
+        collections[i].add(embeddings=embeddings[i], ids=ids[i])
+      embeddings = [[] for i in range(shard_count)]
+      ids = [[] for i in range(shard_count)]
+    embeddings[index % shard_count].append(embedding)
+    ids[index % shard_count].append(id)
+    index += 1
+
+  for i in range(shard_count):
+    collections[i].add(embeddings=embeddings[i], ids=ids[i])
+
 def build_database():
   clients = []
   for host, port in remote_nodes:
@@ -52,13 +73,8 @@ def build_database():
     except:
       pass
   collections = [c.create_collection(collection_name) for c in clients]
-  shard_count = len(clients)
 
-  index = 0
-  for embedding, id in get_embeddings():
-    collections[index].add(embeddings=[embedding], ids=[id])
-    print('Adding embedding %s to server %d' % (id, index))
-    index = (index + 1) % shard_count
+  load_data(collections, wikipedia_embeddings, batch_size=10)
 
 def init():
   with open('nodes.txt') as fh:
