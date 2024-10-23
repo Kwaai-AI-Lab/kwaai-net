@@ -45,6 +45,11 @@ python load.py
 ```
 This will load documents from Wikipedia resulting from the query "Artificial Intelligence" and divide them evenly onto the remote databases.
 
+Alternatively, documents can be loaded from a zim archive file.
+```sh
+python load.py wikipedia_en_all_maxi_2024-01.zim
+```
+
 Query the remote databases:
 ```sh
 python query.py "Can models make moral judgements?"
