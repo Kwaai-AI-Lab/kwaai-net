@@ -56,3 +56,14 @@ python query.py "Can models make moral judgements?"
 ```
 This will retrieve the 5 nearest vectors from each remote database and sort the final list by distance.
 
+The collections and document counts from all cluster nodes can be viewed:
+```sh
+$ python cluster.py
+Server node1:8000
+- wikipedia-test: 25
+- wikipedia-shard: 18900
+Server node2:8000
+- wikipedia-test: 25
+- wikipedia-shard: 18900
+```
+
